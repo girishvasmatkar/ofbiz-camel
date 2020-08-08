@@ -16,14 +16,14 @@
  */
 package org.apache.ofbiz.camel.component;
 
+import java.util.Map;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.RuntimeExchangeException;
-import org.apache.camel.impl.DefaultProducer;
-import org.apache.camel.util.IntrospectionSupport;
+import org.apache.camel.support.DefaultProducer;
+import org.apache.camel.util.PropertiesHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 /**
  * The Ofbiz producer.
@@ -63,6 +63,8 @@ public class OfbizProducer extends DefaultProducer {
     }
 
     private Map<String, Object> getServiceParameters(Map<String, Object> headers) {
-        return IntrospectionSupport.extractProperties(headers, OfbizConstants.CAMEL_OFBIZ_PARAMETERS);
+    	//BeanIntrospection beanIntrospection = getCamelContext().adapt(ExtendedCamelContext.class).getBeanIntrospection();
+    	return PropertiesHelper.extractProperties(headers, OfbizConstants.CAMEL_OFBIZ_PARAMETERS);
+        //return IntrospectionSupport.extractProperties(headers, OfbizConstants.CAMEL_OFBIZ_PARAMETERS);
     }
 }

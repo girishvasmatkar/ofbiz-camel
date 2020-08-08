@@ -18,6 +18,7 @@
  *******************************************************************************/
 package org.apache.ofbiz.camel.loader;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -25,9 +26,9 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
-import org.apache.camel.impl.DefaultPackageScanClassResolver;
-import org.apache.camel.impl.SimpleRegistry;
+import org.apache.camel.impl.engine.DefaultPackageScanClassResolver;
 import org.apache.camel.spi.PackageScanClassResolver;
+import org.apache.camel.support.DefaultRegistry;
 import org.apache.ofbiz.base.container.Container;
 import org.apache.ofbiz.base.container.ContainerConfig;
 import org.apache.ofbiz.base.container.ContainerException;
@@ -41,7 +42,7 @@ import org.apache.ofbiz.service.ServiceContainer;
 /**
  * A container for Apache Camel.
  */
-public class CamelContainer implements Container {
+public class CamelContainer implements Container { 
 	private static final String module = CamelContainer.class.getName();
 //    private static LocalDispatcherFactory dispatcherFactory;
 	private static ProducerTemplate producerTemplate;
@@ -54,17 +55,20 @@ public class CamelContainer implements Container {
 		context = createCamelContext();
 		ContainerConfig.Configuration cfg = ContainerConfig.getConfiguration(name, configFile);
 		String packageName = ContainerConfig.getPropertyValue(cfg, "package", "org.apache.ofbiz.camel.route");
-		PackageScanClassResolver packageResolver = new DefaultPackageScanClassResolver();
-		Set<Class<?>> routesClassesSet = packageResolver.findImplementations(RouteBuilder.class, packageName);
-		routesClassesSet.forEach(key -> {
-			RouteBuilder routeBuilder;
-			try {
-				routeBuilder = createRoutes(key.getName());
-				addRoutesToContext(routeBuilder);
-			} catch (ContainerException e) {
+		try(PackageScanClassResolver packageResolver = new DefaultPackageScanClassResolver();){
+			Set<Class<?>> routesClassesSet = packageResolver.findImplementations(RouteBuilder.class, packageName);
+			routesClassesSet.forEach(key -> {
+				RouteBuilder routeBuilder;
+				try {
+					routeBuilder = createRoutes(key.getName());
+					addRoutesToContext(routeBuilder);
+				} catch (ContainerException e) {
 
-			}
-		});
+				}
+			});
+		} catch (IOException e1) {
+			Debug.logError("Error Starting camel container: "+e1.getMessage(), module);
+		}
 
 		producerTemplate = context.createProducerTemplate();
 
@@ -116,9 +120,9 @@ public class CamelContainer implements Container {
 
 	private DefaultCamelContext createCamelContext() throws ContainerException {
 		LocalDispatcher dispatcher = createDispatcher();
-		SimpleRegistry registry = new SimpleRegistry();
-		registry.put("dispatcher", dispatcher);
-		return new DefaultCamelContext(registry);
+		DefaultRegistry dRegistry = new DefaultRegistry();
+		dRegistry.bind("dispatcher", dispatcher);
+		return new DefaultCamelContext(dRegistry);
 	}
 
 	private RouteBuilder createRoutes(String routeBuilderClassName) throws ContainerException {

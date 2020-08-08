@@ -16,10 +16,10 @@
  */
 package org.apache.ofbiz.camel.component;
 
-import org.apache.camel.Endpoint;
-import org.apache.camel.impl.DefaultComponent;
-
 import java.util.Map;
+
+import org.apache.camel.Endpoint;
+import org.apache.camel.support.DefaultComponent;
 
 /**
  * Represents the component that manages {@link OfbizEndpoint}.
@@ -27,6 +27,7 @@ import java.util.Map;
 public class OfbizComponent extends DefaultComponent {
 
     protected Endpoint createEndpoint(String uri, String remaining, Map<String, Object> parameters) throws Exception {
+    	System.out.println("CALLED!!!!!!!!!!!!!!!!!!!!!!!");
         OfbizEndpoint endpoint = new OfbizEndpoint(uri, this, remaining);
         setProperties(endpoint, parameters);
         if (endpoint.getDispatcher() == null) {

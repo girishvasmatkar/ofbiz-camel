@@ -19,7 +19,7 @@ package org.apache.ofbiz.camel.component;
 import org.apache.camel.Consumer;
 import org.apache.camel.Processor;
 import org.apache.camel.Producer;
-import org.apache.camel.impl.DefaultEndpoint;
+import org.apache.camel.support.DefaultEndpoint;
 import org.apache.ofbiz.service.LocalDispatcher;
 
 /**
